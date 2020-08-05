@@ -1,8 +1,6 @@
 package com.haapp.datasort;
 
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class DataSort {
@@ -57,12 +55,19 @@ public class DataSort {
             char splitLast = 0;
             char splitFirst = 0;
             int index = 0;
+
+            Character[] splitLastTemp = new Character[data.size()];
+            Character[] splitFirstTemp = new Character[data.size()];
+            int dataCounter = 0;
+
             String reg = "[1-9]+[0-9]*";
             for (String str : trimData) {
-                if (str.matches(reg)) {
+
+                if (trimData.stream().filter(s -> s.matches(reg)).count() == trimData.size()) {
                     trimData.sort(Comparator.comparingInt(Integer::parseInt));
                     return trimData;
                 }
+
                 int indexStart = 0;
                 splitFirst = 0;
                 for (int i = 0; i < str.length(); i++) {
@@ -70,12 +75,15 @@ public class DataSort {
                         index = indexStart;
                     } else {
                         splitLast = str.charAt(i);
+                        splitLastTemp[dataCounter] = splitLast;
                         if (splitFirst == 0) {
                             splitFirst = str.charAt(i);
+                            splitFirstTemp[dataCounter] = splitFirst;
                         }
                         indexStart = i + 1;
                     }
                 }
+                dataCounter++;
             }
 
             for (int j = 0; j < data.size(); j++) {
@@ -85,17 +93,45 @@ public class DataSort {
             }
 
             if (index > 0) {
-                String splLast = String.valueOf(splitLast);
-                trimData.sort(Comparator.comparingInt(s -> Integer.parseInt(s.substring(s.lastIndexOf(splLast) + 1))));
+                Set<Character> hs = new HashSet<>(Arrays.asList(splitLastTemp));
+                if (hs.size() == 1) {
+                    String splLast = String.valueOf(splitLast);
+                    trimData.sort(Comparator.comparingInt(s -> Integer.parseInt(s.substring(s.lastIndexOf(splLast) + 1))));
+                } else {
+                    throw new MyException(splitLastTemp,trimData);
+                }
             } else {
-                String splFirst = String.valueOf(splitFirst);
-                trimData.sort(Comparator.comparingInt(s -> Integer.parseInt(s.substring(0, s.lastIndexOf(splFirst)))));
+                Set<Character> hs = new HashSet<>(Arrays.asList(splitFirstTemp));
+                if (hs.size() == 1) {
+                    String splFirst = String.valueOf(splitFirst);
+                    trimData.sort(Comparator.comparingInt(s -> Integer.parseInt(s.substring(0, s.lastIndexOf(splFirst)))));
+                } else {
+                    throw new MyException(splitFirstTemp, trimData);
+                }
             }
-
             return trimData;
-        } catch (NumberFormatException ex) {
-            System.out.println("Нет общего индекса для сортировки. Данные не отсортированы");
+        } catch (MyException ex) {
+            System.out.println("Сортировка не осуществлена. Найдены различия в индексах для сортировки:");
+            ex.printErrors();
         }
         return data;
+    }
+
+    private static class MyException extends Exception {
+
+        private final Character[] splitArray;
+
+        private final List<String> data;
+
+        public MyException(Character[] splitArray, List<String> data) {
+            this.data=data;
+            this.splitArray=splitArray;
+        }
+
+        public void printErrors(){
+            for (int i =0; i < splitArray.length; i++){
+                System.out.println("разделитель: |" + splitArray[i] + "| элемент: " + data.get(i));
+            }
+        }
     }
 }
