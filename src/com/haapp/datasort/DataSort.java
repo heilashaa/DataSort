@@ -13,7 +13,7 @@ public class DataSort {
 //        List<String> data04 = Arrays.asList("С-26", "К-5", "А-15");
 //        List<String> data05 = Arrays.asList("55/АР", "10/Д", "100/ДК", "99/ДО");
 
-        List<String> data01 = Arrays.asList("1", "17-01/15", "17-01/10", "24-16/32", "02-03/13", "79-04/18", "25-11/11");
+        List<String> data01 = Arrays.asList("1", " 5");
         List<String> data02 = Arrays.asList("С", "К-5", "А-15");
         List<String> data03 = Arrays.asList("С 26", "К-5", "А-15");
         List<String> data04 = Arrays.asList("С-[26]", "К-5", "А-15");
@@ -65,6 +65,11 @@ public class DataSort {
 
                 if (trimData.stream().filter(s -> s.matches(reg)).count() == trimData.size()) {
                     trimData.sort(Comparator.comparingInt(Integer::parseInt));
+                    for (int j = 0; j < data.size(); j++) {
+                        if (data.get(j).length() != trimData.get(j).length()) {
+                            System.out.println("!Внимание! В элементе " + data.get(j) + " найдены и убраны лишние пробелы");
+                        }
+                    }
                     return trimData;
                 }
 
